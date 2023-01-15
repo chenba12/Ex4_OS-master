@@ -446,9 +446,9 @@ void TSP_cmd(int nodes[], int k) {
         i++;
     }
     if (isPath) {
-        printf("TSP shortest path: %d\n", min_path_length);
+        printf("TSP shortest path: %d \n", min_path_length);
     } else {
-        printf("TSP shortest path: %d\n", -1);
+        printf("TSP shortest path: %d \n", -1);
     }
     i = 0;
     for (i = 0; i < factRes; i++) {
