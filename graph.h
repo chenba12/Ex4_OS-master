@@ -37,6 +37,8 @@ void deleteGraph_cmd();
 
 void TSP_cmd(int nodes[], int k);
 
+int getNum(char *userInput, int start, char *num);
+
 int shortsPath_cmd(int src, int dest);
 
 int nextLetter(char *userInput);

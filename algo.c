@@ -99,6 +99,7 @@ void build_graph_cmd(char *userInput, int end) {
 
 
 void insert_node_cmd(char *userInput, int end) {
+
     int i = 0;
     pnode src = NULL;
     pnode dest = NULL;
@@ -110,7 +111,7 @@ void insert_node_cmd(char *userInput, int end) {
     int pointer = i + index;
     i = 1;
     if (node != NULL) {
-        deleteOutwardEdges(node->data);
+        deleteOutwardEdges(number);
         src = node;
     } else {
         src = createNode(number);
@@ -198,6 +199,7 @@ pnode createNode(int data) {
     node->data = data;
     node->first_edge = NULL;
     node->last_edge = NULL;
+    node->next = NULL;
     // Add the Node to the array of first_node
     if (graph->last_node == NULL) {
         graph->last_node = node;
@@ -341,16 +343,30 @@ void permute(int *arr, int start, int end, int **result, int *count) {
     }
 }
 
+int find(int **distArr, int num, int k) {
+    for (int i = 0; i < k + 1; ++i) {
+        if (distArr[0][i] == num) return i;
+    }
+    return -1;
+}
 
 void TSP_cmd(int nodes[], int k) {
-    int **distArr = (int **) malloc((k + 1) * sizeof(int *));
+    pnode pointer = graph->first_node;
+    // initialize all distances to infinity
+//    while (pointer != NULL) {
+//        pointer->distance = INT_MAX / 2;
+//        pointer = pointer->next;
+//    }
+
+    int **distArr = (int **) calloc((k + 1), sizeof(int *));
     for (int i = 0; i < k + 1; i++) {
-        distArr[i] = (int *) malloc((k + 1) * sizeof(int));
+        distArr[i] = (int *) calloc((k + 1), sizeof(int));
     }
     for (int i = 1; i < k + 1; ++i) {
         distArr[0][i] = nodes[i - 1];
         distArr[i][0] = nodes[i - 1];
     }
+
     for (int i = 1; i < k + 1; i++) {
         shortsPath_cmd(distArr[0][i], distArr[0][i]);
         for (int j = 1; j < k + 1; j++) {
@@ -365,14 +381,28 @@ void TSP_cmd(int nodes[], int k) {
         result[i] = (int *) malloc(sizeof(int) * k);
     }
     permute(nodes, 0, k - 1, result, &count);
+//    for (int i = 0; i < k; ++i) {
+//        for (int j = 0; j < k; ++j) {
+//            printf("%d,", result[i][j]);
+//        }
+//        printf("\n");
+//    }
     bool isPath = false;
-    int cur_path_length = 0;
+    int cur_path_length;
     int min_path_length = INT_MAX;
     int i = 0;
+//    for (int i = 0; i < k + 1; ++i) {
+//        for (int j = 0; j < k + 1; ++j) {
+//            printf("%d,", distArr[i][j]);
+//        }
+//        printf("\n");
+//    }
     while (i < k) {
         cur_path_length = 0;
         for (int j = 0; j < k - 1; ++j) {
-            cur_path_length += distArr[result[i][j]][result[i][j + 1]];
+            int index1 = find(distArr, result[i][j], k);
+            int index2 = find(distArr, result[i][j + 1], k);
+            cur_path_length += distArr[index1][index2];
             if (cur_path_length >= INT_MAX / 2 || cur_path_length <= 0) {
                 j = k - 1;
             }
@@ -392,25 +422,13 @@ void TSP_cmd(int nodes[], int k) {
     for (i = 0; i < k * k; i++) {
         free(result[i]);
     }
-    for (int i = 0; i < k + 1; i++) {
+    i = 0;
+    for (i = 0; i < k + 1; i++) {
         free(distArr[i]);
     }
     free(distArr);
     free(result);
 }
-
-
-
-
-
-
-
-
-
-
-
-// free the allocated memory
-
 
 void deleteEmptyNode(int data) {
     pnode temp = graph->first_node;
