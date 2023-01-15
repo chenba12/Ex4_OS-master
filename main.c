@@ -4,19 +4,21 @@
 #include "graph.h"
 
 int main() {
-    char *userInput = NULL;
-    int size = 10;
+    int size = 0;
+    char *userInput = calloc(size, sizeof(char));
     char c;
     char *num = (char *) calloc(10, sizeof(char));
     int number = 0;
     int index;
     while ((c = fgetc(stdin)) != EOF) {
-        printf("%c", c);
         userInput = (char *) realloc(userInput, (size + 10) * sizeof(char));
+        if (userInput == NULL) {
+            printf("?!");
+        }
         userInput[size++] = c;
     }
     userInput = (char *) realloc(userInput, (size + 1) * sizeof(char));
-    printf("user len %d\n", size);
+    userInput[size++] = '\0';
     for (int i = 0; i < size; i++) {
         if (userInput[i] == 'A') {
             i += 2;
@@ -44,13 +46,15 @@ int main() {
             printf("Dijsktra shortest path: %d \n", path);
             i += index;
         } else if (userInput[i] == 'T') {
-            printf("in T\n");
+//            printf("in T\n");
             i += 2;
             int k = userInput[i] - '0';
+//            printf("k is %d\n", k);
             i += 2;
             int s = 0;
             int *nodes = (int *) malloc(k * sizeof(int));
             while (s < k) {
+
                 if (userInput[i] == ' ') {
                     i++;
                     continue;
@@ -58,6 +62,7 @@ int main() {
                     index = getNum(userInput, i, num);
                     sscanf(num, "%d", &number);
                     nodes[s] = number;
+//                    printf("%d\n", number);
                     s++;
                     i += index;
                 }

@@ -43,7 +43,6 @@ int getNum(char *userInput, int start, char *num) {
 }
 
 void build_graph_cmd(char *userInput, int end) {
-    printf("in A\n");
     if (graph != NULL) {
         deleteGraph_cmd();
     }
@@ -351,10 +350,20 @@ void permute(int *arr, int start, int end, int **result, int *count) {
 }
 
 int find(int **distArr, int num, int k) {
+
     for (int i = 0; i < k + 1; ++i) {
-        if (distArr[0][i] == num) return i;
+        if (distArr[0][i] == num) {
+            return i;
+        }
     }
     return -1;
+}
+
+int factorial(int n) {
+    if (n == 0)
+        return 1;
+    else
+        return n * factorial(n - 1);
 }
 
 void TSP_cmd(int nodes[], int k) {
@@ -364,6 +373,10 @@ void TSP_cmd(int nodes[], int k) {
 //        pointer->distance = INT_MAX / 2;
 //        pointer = pointer->next;
 //    }
+//    for (int i = 0; i < k; ++i) {
+//        printf("%d??,", nodes[i]);
+//    }
+//    printf("\n");
 
     int **distArr = (int **) calloc((k + 1), sizeof(int *));
     for (int i = 0; i < k + 1; i++) {
@@ -382,13 +395,15 @@ void TSP_cmd(int nodes[], int k) {
             } else distArr[i][j] = findNode(nodes[j - 1])->distance;
         }
     }
+
     int count = 0;
-    int **result = (int **) malloc(sizeof(int *) * k * k);
-    for (int i = 0; i < k * k; i++) {
+    int factRes = factorial(k);
+    int **result = (int **) malloc(sizeof(int *) * factRes);
+    for (int i = 0; i < factRes; i++) {
         result[i] = (int *) malloc(sizeof(int) * k);
     }
     permute(nodes, 0, k - 1, result, &count);
-//    for (int i = 0; i < k; ++i) {
+//    for (int i = 0; i < factRes; ++i) {
 //        for (int j = 0; j < k; ++j) {
 //            printf("%d,", result[i][j]);
 //        }
@@ -398,20 +413,28 @@ void TSP_cmd(int nodes[], int k) {
     int cur_path_length;
     int min_path_length = INT_MAX;
     int i = 0;
+//    printf("******************\n");
+//    printGraph_cmd();
+//    printf("******************\n");
 //    for (int i = 0; i < k + 1; ++i) {
 //        for (int j = 0; j < k + 1; ++j) {
 //            printf("%d,", distArr[i][j]);
 //        }
 //        printf("\n");
 //    }
-    while (i < k) {
+//    printf("******************\n");
+    while (i < factRes) {
         cur_path_length = 0;
         for (int j = 0; j < k - 1; ++j) {
+//            printf("we were on the lookout for many criminals %d and big tity gf %d\n", result[i][j], result[i][j + 1]);
             int index1 = find(distArr, result[i][j], k);
             int index2 = find(distArr, result[i][j + 1], k);
+//            printf("index1 %d\n", index1);
+//            printf("index2 %d\n", index2);
+//            printf("distArr[index1][index2] %d\n", distArr[index1][index2]);
             cur_path_length += distArr[index1][index2];
             if (cur_path_length >= INT_MAX / 2 || cur_path_length <= 0) {
-                j = k - 1;
+                break;
             }
         }
         if (cur_path_length < INT_MAX / 2 && cur_path_length > 0) {
@@ -428,7 +451,7 @@ void TSP_cmd(int nodes[], int k) {
         printf("TSP shortest path: %d\n", -1);
     }
     i = 0;
-    for (i = 0; i < k * k; i++) {
+    for (i = 0; i < factRes; i++) {
         free(result[i]);
     }
     i = 0;
