@@ -5,7 +5,7 @@ typedef struct GRAPH_NODE_ *pnode;
 typedef struct GRAPH_EDGE_ *pedge;
 
 typedef struct GRAPH_EDGE_ {
-    int endpoint;
+    pnode endpoint;
     int weight;
     pedge next;
 } Edge, *pedge;
@@ -15,6 +15,7 @@ typedef struct GRAPH_NODE_ {
     pedge first_edge;
     pedge last_edge;
     pnode next;
+    int distance;
 } Node, *pnode;
 
 typedef struct Graph_ {
@@ -34,10 +35,11 @@ void printGraph_cmd(); //for self debug
 
 void deleteGraph_cmd();
 
-void shortsPath_cmd(int src, int dest);
+void TSP_cmd(int nodes[], int k);
 
-void TSP_cmd();
+int shortsPath_cmd(int src, int dest);
 
 int nextLetter(char *userInput);
+
 
 #endif

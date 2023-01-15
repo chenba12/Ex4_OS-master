@@ -2,12 +2,10 @@
 #include <string.h>
 #include <stdlib.h>
 #include <limits.h>
-#include <math.h>
+#include <stdbool.h>
 #include "graph.h"
 
 pgraph graph = NULL;
-int weight = INT_MAX;
-int size;
 
 int countN(char *p);
 
@@ -17,70 +15,128 @@ pnode createNode(int data);
 
 pnode findNode(int data);
 
-void addEdge(pnode src, int dest, int weight);
+void addEdge(pnode src, pnode dest, int weight);
 
 int countBetween(const char *p, int start);
 
-//TODO dont ignore the final n
+int getNum(char *userInput, int start, char *num) {
+    int size = 0;
+    int maxSize = 9;
+    for (int i = start; i < strlen(userInput); ++i) {
+        if (userInput[i] == ' ' || userInput[i] == '\n') {
+            if (size == maxSize) {
+                num = (char *) realloc(num, size + 1 * sizeof(char));
+                maxSize++;
+            }
+            num[size] = '\0';
+            return size;
+        } else {
+            if (size == maxSize) {
+                num = (char *) realloc(num, size + 1 * sizeof(char));
+                maxSize++;
+            }
+            num[size] = userInput[i];
+            size++;
+        }
+    }
+    return -1;
+}
+
 void build_graph_cmd(char *userInput, int end) {
     if (graph != NULL) {
         deleteGraph_cmd();
     }
-    printf("%s\n", userInput);
     graph = malloc(sizeof(struct Graph_));
     graph->amountOfNodes = 0;
     graph->amountOfEdges = 0;
     int ns = countN(userInput);
-    int pointer = 2;
+    int pointer = 5;
     int counter = 0;
+    char *num = (char *) calloc(10, sizeof(char));
+    int number = 0;
     pnode src = NULL;
     pnode dest = NULL;
     for (int i = 0; i < ns - 1; ++i) {
         int j = countBetween(userInput, pointer);
         for (int k = 0; k < j; k++) {
             if (counter == 0) {
-                src = createNode(userInput[pointer] - '0');
+                int index = getNum(userInput, pointer, num);
+                sscanf(num, "%d", &number);
+                src = createNode(number);
+                number = 0;
+                k += index;
+                pointer += index;
             } else if (counter % 2 == 1) {
-                dest = createNode(userInput[pointer] - '0');
+                int index = getNum(userInput, pointer, num);
+                sscanf(num, "%d", &number);
+                dest = createNode(number);
+                number = 0;
+                k += index;
+                pointer += index;
             } else if (counter % 2 == 0) {
-                int weight = userInput[pointer] - '0';
-                printf("src-> data %d\n", src->data);
-                printf("dest-> data %d\n", dest->data);
-                printf("weight = %d\n", weight);
-                addEdge(src, dest->data, weight);
+                int index = getNum(userInput, pointer, num);
+                sscanf(num, "%d", &number);
+                k += index;
+                pointer += index;
+//                printf("src-> data %d\n", src->data);
+//                printf("dest-> data %d\n", dest->data);
+//                printf("weight = %d\n", number);
+                addEdge(src, dest, number);
+                number = 0;
             }
             //A 4 n 0 2 5 3 3 n 2 0 4 1 1 n 1 3 7 0 2 n 3 T 3 2 1 3 S 2 0
             pointer++;
+            if (userInput[pointer] == ' ') pointer++;
             counter++;
         }
         counter = 0;
         pointer++;
+        if (userInput[pointer] == ' ') pointer++;
     }
-    printGraph_cmd();
+
+//    printGraph_cmd();
 }
+
 
 void insert_node_cmd(char *userInput, int end) {
     int i = 0;
     pnode src = NULL;
     pnode dest = NULL;
-    int weight;
-    while (i != end) {
-        pnode node = findNode(userInput[i] - '0');
-        if (i == 0) {
-            if (node != NULL) {
-                deleteOutwardEdges(node->data);
-                src = node;
-            } else {
-                src = createNode(userInput[i] - '0');
-                //doesn't exist
-            }
-        } else if (i % 2 == 1) {
-            dest = createNode(userInput[i] - '0');
+    char *num = (char *) calloc(10, sizeof(char));
+    int number = 0;
+    int index = getNum(userInput, i, num);
+    sscanf(num, "%d", &number);
+    pnode node = findNode(number);
+    int pointer = i + index;
+    i = 1;
+    if (node != NULL) {
+        deleteOutwardEdges(node->data);
+        src = node;
+    } else {
+        src = createNode(number);
+    }
+    number = 0;
+    if (userInput[pointer] == ' ') {
+        pointer++;
+    }
+    while (pointer < end - 1) {
+        if (i % 2 == 1) {
+            index = getNum(userInput, pointer, num);
+            sscanf(num, "%d", &number);
+            dest = createNode(number);
+            pointer += index;
+            number = 0;
         } else if (i % 2 == 0) {
-            weight = userInput[i] - '0';
-            addEdge(src, dest->data, weight);
+            index = getNum(userInput, pointer, num);
+            sscanf(num, "%d", &number);
+            addEdge(src, dest, number);
+            pointer += index;
         }
         i++;
+        pointer++;
+        if (userInput[pointer] == ' ') {
+            pointer++;
+        }
     }
 }
 
@@ -106,7 +162,7 @@ void printGraph_cmd() {
         printf("  Edges:\n");
         edge = node->first_edge;
         while (edge != NULL) {
-            printf("endpoint -> %d (weight = %d)\n", edge->endpoint, edge->weight);
+            printf("endpoint -> %d (weight = %d)\n", edge->endpoint->data, edge->weight);
             edge = edge->next;
         }
         node = node->next;
@@ -114,7 +170,7 @@ void printGraph_cmd() {
 }
 
 
-void addEdge(pnode src, int dest, int weight) {
+void addEdge(pnode src, pnode dest, int weight) {
     pedge edge = (pedge) malloc(sizeof(Edge));
     edge->endpoint = dest;
     edge->weight = weight;
@@ -211,7 +267,7 @@ void deleteInComingEdges(int data) {
         pedge edge = node->first_edge;
         pedge prev = NULL;
         while (edge != NULL) {
-            if (edge->endpoint == data) {
+            if (edge->endpoint->data == data) {
                 // This edge has the given endpoint node as the destination
                 pedge temp = edge;
                 if (prev == NULL) {
@@ -231,6 +287,130 @@ void deleteInComingEdges(int data) {
         node = node->next;
     }
 }
+
+int shortsPath_cmd(int src, int dest) {
+//    printf("start is %d end is %d\n", src, dest);
+    pnode pointer = graph->first_node;
+    // initialize all distances to infinity
+    while (pointer != NULL) {
+        if (pointer->data == src) {
+            pointer->distance = 0;
+        } else pointer->distance = INT_MAX / 2;
+        pointer = pointer->next;
+    }
+    for (int i = 0; i < graph->amountOfNodes - 1; i++) {
+        pnode pointer2 = graph->first_node;
+        for (int j = 0; j < graph->amountOfNodes; j++) {
+            for (pedge edge = pointer2->first_edge; edge != NULL; edge = edge->next) {
+                pnode neighbor = edge->endpoint;
+                int new_distance = pointer2->distance + edge->weight;
+                if (neighbor->distance >= new_distance) {
+                    neighbor->distance = new_distance;
+                }
+            }
+            pointer2 = pointer2->next;
+        }
+    }
+    pnode node = findNode(dest);
+    if (node->distance == INT_MAX) {
+        return -1;
+    } else return node->distance;
+}
+
+void permute(int *arr, int start, int end, int **result, int *count) {
+    if (start == end) {
+        // save the current permutation
+        for (int i = 0; i <= end; i++)
+            result[*count][i] = arr[i];
+        (*count)++;
+    } else {
+        for (int i = start; i <= end; i++) {
+            // swap the current element with the start
+            int temp = arr[start];
+            arr[start] = arr[i];
+            arr[i] = temp;
+
+            // recursively generate permutations for the remaining elements
+            permute(arr, start + 1, end, result, count);
+
+            // swap the current element back to its original position
+            temp = arr[start];
+            arr[start] = arr[i];
+            arr[i] = temp;
+        }
+    }
+}
+
+
+void TSP_cmd(int nodes[], int k) {
+    int **distArr = (int **) malloc((k + 1) * sizeof(int *));
+    for (int i = 0; i < k + 1; i++) {
+        distArr[i] = (int *) malloc((k + 1) * sizeof(int));
+    }
+    for (int i = 1; i < k + 1; ++i) {
+        distArr[0][i] = nodes[i - 1];
+        distArr[i][0] = nodes[i - 1];
+    }
+    for (int i = 1; i < k + 1; i++) {
+        shortsPath_cmd(distArr[0][i], distArr[0][i]);
+        for (int j = 1; j < k + 1; j++) {
+            if (i == j) {
+                distArr[i][j] = 0;
+            } else distArr[i][j] = findNode(nodes[j - 1])->distance;
+        }
+    }
+    int count = 0;
+    int **result = (int **) malloc(sizeof(int *) * k * k);
+    for (int i = 0; i < k * k; i++) {
+        result[i] = (int *) malloc(sizeof(int) * k);
+    }
+    permute(nodes, 0, k - 1, result, &count);
+    bool isPath = false;
+    int cur_path_length = 0;
+    int min_path_length = INT_MAX;
+    int i = 0;
+    while (i < k) {
+        cur_path_length = 0;
+        for (int j = 0; j < k - 1; ++j) {
+            cur_path_length += distArr[result[i][j]][result[i][j + 1]];
+            if (cur_path_length >= INT_MAX / 2 || cur_path_length <= 0) {
+                j = k - 1;
+            }
+        }
+        if (cur_path_length < INT_MAX / 2 && cur_path_length > 0) {
+            isPath = true;
+            if (cur_path_length < min_path_length) {
+                min_path_length = cur_path_length;
+            }
+        }
+        i++;
+    }
+    if (isPath) {
+        printf("TSP shortest path: %d\n", min_path_length);
+    }
+    i = 0;
+    for (i = 0; i < k * k; i++) {
+        free(result[i]);
+    }
+    for (int i = 0; i < k + 1; i++) {
+        free(distArr[i]);
+    }
+    free(distArr);
+    free(result);
+}
+
+
+
+
+
+
+
+
+
+
+
+// free the allocated memory
+
 
 void deleteEmptyNode(int data) {
     pnode temp = graph->first_node;
@@ -261,61 +441,10 @@ void delete_node_cmd(int data) {
     if (!findNode(data)) {
         return;
     }
-    printf("data is %d\n", data);
     deleteOutwardEdges(data);
     deleteInComingEdges(data);
     deleteEmptyNode(data);
-    printf("*************************\n");
-    printGraph_cmd();
 }
-
-int min(int a, int b) {
-    if (a > b) {
-        return b;
-    } else return a;
-}
-
-void shortsPath_cmd(int start, int end) {
-    start = 0;
-    end = 2;
-    int dist[graph->amountOfNodes][graph->amountOfNodes];
-
-    // Initialize distance matrix
-    for (int i = 0; i < graph->amountOfNodes; i++) {
-        for (int j = 0; j < graph->amountOfNodes; j++) {
-            if (i == j) {
-                dist[i][j] = 0;
-            } else {
-                dist[i][j] = INT_MAX;
-            }
-        }
-    }
-
-    // Fill distance matrix with edge weights
-    pnode curr = graph->first_node;
-    while (curr != NULL) {
-        pedge edge = curr->first_edge;
-        while (edge != NULL) {
-            dist[edge->endpoint][curr->data] = edge->weight;
-            edge = edge->next;
-        }
-        curr = curr->next;
-    }
-
-    // Floyd-Warshall algorithm
-    for (int k = 0; k < graph->amountOfNodes; k++) {
-        for (int i = 0; i < graph->amountOfNodes; i++) {
-            for (int j = 0; j < graph->amountOfNodes; j++) {
-                if (dist[i][k] != INT_MAX && dist[k][j] != INT_MAX) {
-                    dist[i][j] = min(dist[i][j], dist[i][k] + dist[k][j]);
-                }
-            }
-        }
-    }
-    // Print shortest distance between start and end
-    printf("Dijsktra shortest path: %d\n", dist[start][end]);
-}
-
 
 void deleteGraph_cmd() {
     if (graph != NULL) {
@@ -345,3 +474,4 @@ void deleteGraph_cmd() {
     }
     graph = NULL;
 }
+

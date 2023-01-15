@@ -8,31 +8,28 @@ int main() {
     int size = 0;
     int c;
     while ((c = fgetc(stdin)) != EOF) {
-        if ((char) c != ' ' && (char) c != '\t' && (char) c != '\n') {
-            userInput = (char *) realloc(userInput, (size + 1) * sizeof(char));
-            userInput[size++] = (char) c;
-        }
+        userInput = (char *) realloc(userInput, (size + 1) * sizeof(char));
+        userInput[size++] = (char) c;
     }
-    printf("%s\n", userInput);
     for (size_t i = 0; i < strlen(userInput); i++) {
         if (userInput[i] == 'A') {
             int end = nextLetter(userInput + i + 1);
             build_graph_cmd(userInput + i + 1, end);
         } else if (userInput[i] == 'B') {
             int end = nextLetter(userInput + i + 1);
-            insert_node_cmd(userInput + i + 1, end);
+            insert_node_cmd(userInput + i + 2, end);
         } else if (userInput[i] == 'D') {
-            delete_node_cmd(userInput[i + 1] - '0');
+            delete_node_cmd(userInput[i + 2] - '0');
         } else if (userInput[i] == 'S') {
-            shortsPath_cmd(0, 2);
+            int path = shortsPath_cmd(userInput[i + 2] - '0', userInput[i + 4] - '0');
+            printf("Dijsktra shortest path: %d \n", path);
         } else if (userInput[i] == 'T') {
-            int nodes[3] = {2, 1, 3};
-            TSP_cmd();
+            int nodes[3]={2,1,3};
+            TSP_cmd(nodes, 3);
         }
     }
-
-//    graphToMatrix();
     free(userInput);
     deleteGraph_cmd();
     return 0;
 }
+

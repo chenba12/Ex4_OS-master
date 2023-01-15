@@ -1,2 +1,7 @@
 # Project exclude paths
 /cmake-build-debug/
+/.idea/.gitignore
+/4_1.pdf
+/tests/inputs/input5.txt
+/.idea/misc.xml
+/.idea/vcs.xml
