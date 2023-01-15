@@ -23,7 +23,10 @@ int getNum(char *userInput, int start, char *num) {
     int size = 0;
     int maxSize = 9;
     for (int i = start; i < strlen(userInput); ++i) {
-        if (userInput[i] == ' ' || userInput[i] == '\n') {
+//        printf("userinout %c\n", userInput[start]);
+        if (userInput[i] == ' ' || userInput[i] == '\n' || userInput[i] == 'B' || userInput[i] == 'D' ||
+            userInput[i] == 'T' || userInput[i] == 'S' ||
+            userInput[i] == 'A') {
             if (size == maxSize) {
                 num = (char *) realloc(num, size + 1 * sizeof(char));
                 maxSize++;
@@ -46,13 +49,14 @@ void build_graph_cmd(char *userInput, int end) {
     if (graph != NULL) {
         deleteGraph_cmd();
     }
+//    printf("%s\n", userInput);
     graph = malloc(sizeof(struct Graph_));
     graph->amountOfNodes = 0;
     graph->amountOfEdges = 0;
     graph->first_node = NULL;
     graph->last_node = NULL;
     int ns = countN(userInput);
-    int pointer = 5;
+    int pointer = 4;
     int counter = 0;
     char *num = (char *) calloc(10, sizeof(char));
     int number = 0;
@@ -62,23 +66,33 @@ void build_graph_cmd(char *userInput, int end) {
         int j = countBetween(userInput, pointer);
         for (int k = 0; k < j; k++) {
             if (counter == 0) {
+//                printf("%c asdasd\n", userInput[pointer]);
                 int index = getNum(userInput, pointer, num);
                 sscanf(num, "%d", &number);
+//                printf("num is %d\n", number);
                 src = createNode(number);
                 number = 0;
                 k += index;
+//                printf("src index %d pointer is %d and then pointer is %d\n", index, pointer, pointer + index);
                 pointer += index;
+//                printf("%c", userInput[pointer]);
+
             } else if (counter % 2 == 1) {
                 int index = getNum(userInput, pointer, num);
                 sscanf(num, "%d", &number);
                 dest = createNode(number);
+//                printf("dest num is %d\n", number);
                 number = 0;
                 k += index;
+//                printf("dest index %d pointer is %d and then pointer is %d\n", index, pointer, pointer + index);
                 pointer += index;
+
+
             } else if (counter % 2 == 0) {
                 int index = getNum(userInput, pointer, num);
                 sscanf(num, "%d", &number);
                 k += index;
+//                printf("edge index %d pointer is %d and then pointer is %d\n", index, pointer, pointer + index);
                 pointer += index;
 //                printf("**************\n");
 //                printf("src-> data %d\n", src->data);
@@ -90,20 +104,28 @@ void build_graph_cmd(char *userInput, int end) {
             }
             //A 4 n 0 2 5 3 3 n 2 0 4 1 1 n 1 3 7 0 2 n 3 T 3 2 1 3 S 2 0
             pointer++;
+            if (userInput[pointer] == 'B' || userInput[pointer] == 'D' || userInput[pointer] == 'T' || userInput[pointer] == 'S' ||
+                userInput[pointer] == 'A') {
+                break;
+            }
             if (userInput[pointer] == ' ') pointer++;
             counter++;
         }
+        if (userInput[pointer] == 'B' || userInput[pointer] == 'D' || userInput[pointer] == 'T' || userInput[pointer] == 'S' ||
+            userInput[pointer] == 'A') {
+            break;
+        }
         counter = 0;
         pointer++;
+
         if (userInput[pointer] == ' ') pointer++;
     }
+//    printf("\n");
     free(num);
-//    printf("user input is %c\n", userInput[pointer + 2]);
-//    printf("out a\n");
+//    printf("******************\n");
 //    printGraph_cmd();
-//    printf("**************\n");
+//    printf("******************\n");
 }
-
 
 void insert_node_cmd(char *userInput, int end) {
     int i = 0;
@@ -368,14 +390,8 @@ int factorial(int n) {
 }
 
 void TSP_cmd(int nodes[], int k) {
-    pnode pointer = graph->first_node;
-    // initialize all distances to infinity
-//    while (pointer != NULL) {
-//        pointer->distance = INT_MAX / 2;
-//        pointer = pointer->next;
-//    }
 //    for (int i = 0; i < k; ++i) {
-//        printf("%d??,", nodes[i]);
+//        printf("%d,", nodes[i]);
 //    }
 //    printf("\n");
 
