@@ -5,19 +5,23 @@
 
 int main() {
     char *userInput = NULL;
-    int size = 0;
-    int c;
+    int size = 10;
+    char c;
     char *num = (char *) calloc(10, sizeof(char));
     int number = 0;
     int index;
     while ((c = fgetc(stdin)) != EOF) {
-        userInput = (char *) realloc(userInput, (size + 1) * sizeof(char));
-        userInput[size++] = (char) c;
+        printf("%c", c);
+        userInput = (char *) realloc(userInput, (size + 10) * sizeof(char));
+        userInput[size++] = c;
     }
-    for (int i = 0; i < strlen(userInput); i++) {
+    userInput = (char *) realloc(userInput, (size + 1) * sizeof(char));
+    printf("user len %d\n", size);
+    for (int i = 0; i < size; i++) {
         if (userInput[i] == 'A') {
-            int end = nextLetter(userInput + i + 1);
-            build_graph_cmd(userInput + i + 1, end);
+            i += 2;
+            int end = nextLetter(userInput + i);
+            build_graph_cmd(userInput + i, end);
         } else if (userInput[i] == 'B') {
             int end = nextLetter(userInput + i + 1);
             insert_node_cmd(userInput + i + 2, end);
@@ -40,6 +44,7 @@ int main() {
             printf("Dijsktra shortest path: %d \n", path);
             i += index;
         } else if (userInput[i] == 'T') {
+            printf("in T\n");
             i += 2;
             int k = userInput[i] - '0';
             i += 2;

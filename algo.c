@@ -43,12 +43,15 @@ int getNum(char *userInput, int start, char *num) {
 }
 
 void build_graph_cmd(char *userInput, int end) {
+    printf("in A\n");
     if (graph != NULL) {
         deleteGraph_cmd();
     }
     graph = malloc(sizeof(struct Graph_));
     graph->amountOfNodes = 0;
     graph->amountOfEdges = 0;
+    graph->first_node = NULL;
+    graph->last_node = NULL;
     int ns = countN(userInput);
     int pointer = 5;
     int counter = 0;
@@ -78,9 +81,11 @@ void build_graph_cmd(char *userInput, int end) {
                 sscanf(num, "%d", &number);
                 k += index;
                 pointer += index;
+//                printf("**************\n");
 //                printf("src-> data %d\n", src->data);
 //                printf("dest-> data %d\n", dest->data);
 //                printf("weight = %d\n", number);
+//                printf("**************\n");
                 addEdge(src, dest, number);
                 number = 0;
             }
@@ -93,13 +98,14 @@ void build_graph_cmd(char *userInput, int end) {
         pointer++;
         if (userInput[pointer] == ' ') pointer++;
     }
-
+//    printf("user input is %c\n", userInput[pointer + 2]);
+//    printf("out a\n");
 //    printGraph_cmd();
+//    printf("**************\n");
 }
 
 
 void insert_node_cmd(char *userInput, int end) {
-
     int i = 0;
     pnode src = NULL;
     pnode dest = NULL;
@@ -138,6 +144,7 @@ void insert_node_cmd(char *userInput, int end) {
         if (userInput[pointer] == ' ') {
             pointer++;
         }
+
     }
 }
 
@@ -417,6 +424,8 @@ void TSP_cmd(int nodes[], int k) {
     }
     if (isPath) {
         printf("TSP shortest path: %d\n", min_path_length);
+    } else {
+        printf("TSP shortest path: %d\n", -1);
     }
     i = 0;
     for (i = 0; i < k * k; i++) {
@@ -481,15 +490,32 @@ void deleteGraph_cmd() {
         node = graph->first_node;
         while (node != NULL) {
             pnode temp = node;
-            free(temp);
             node = node->next;
+            free(temp);
         }
         // Reset the fields of the graph struct
         graph->first_node = NULL;
+        graph->last_node = NULL;
         graph->amountOfNodes = 0;
         graph->amountOfEdges = 0;
         free(graph);
     }
     graph = NULL;
+}
+
+void deleteGraph() {
+    pnode currentNode = graph->first_node;
+    while (currentNode != NULL) {
+        pedge currentEdge = currentNode->first_edge;
+        while (currentEdge != NULL) {
+            pedge nextEdge = currentEdge->next;
+            free(currentEdge);
+            currentEdge = nextEdge;
+        }
+        pnode nextNode = currentNode->next;
+        free(currentNode);
+        currentNode = nextNode;
+    }
+    free(graph);
 }
 
