@@ -68,8 +68,10 @@ int main() {
                 }
             }
             TSP_cmd(nodes, k);
+            free(nodes);
         }
     }
+    free(num);
     free(userInput);
     deleteGraph_cmd();
     return 0;

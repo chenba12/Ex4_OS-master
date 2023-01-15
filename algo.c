@@ -97,6 +97,7 @@ void build_graph_cmd(char *userInput, int end) {
         pointer++;
         if (userInput[pointer] == ' ') pointer++;
     }
+    free(num);
 //    printf("user input is %c\n", userInput[pointer + 2]);
 //    printf("out a\n");
 //    printGraph_cmd();
@@ -143,8 +144,8 @@ void insert_node_cmd(char *userInput, int end) {
         if (userInput[pointer] == ' ') {
             pointer++;
         }
-
     }
+    free(num);
 }
 
 
