@@ -13,7 +13,7 @@ int main() {
     while ((c = fgetc(stdin)) != EOF) {
         userInput = (char *) realloc(userInput, (size + 10) * sizeof(char));
         if (userInput == NULL) {
-            printf("?!");
+            printf("realloc fail");
         }
         userInput[size++] = c;
     }
@@ -46,15 +46,12 @@ int main() {
             printf("Dijsktra shortest path: %d \n", path);
             i += index;
         } else if (userInput[i] == 'T') {
-//            printf("in T\n");
             i += 2;
             int k = userInput[i] - '0';
-//            printf("k is %d\n", k);
             i += 2;
             int s = 0;
             int *nodes = (int *) malloc(k * sizeof(int));
             while (s < k) {
-
                 if (userInput[i] == ' ') {
                     i++;
                     continue;
@@ -62,7 +59,6 @@ int main() {
                     index = getNum(userInput, i, num);
                     sscanf(num, "%d", &number);
                     nodes[s] = number;
-//                    printf("%d\n", number);
                     s++;
                     i += index;
                 }
